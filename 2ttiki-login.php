@@ -1,7 +1,8 @@
 <?php
 
-$req_uri = explode("/",$_SERVER['REQUEST_URI']); 
-$client_code = $req_uri[1];
+//$req_uri = explode("/",$_SERVER['REQUEST_URI']); 
+//$client_code = $req_uri[1];
+$client_code = $_REQUEST['client']
 $user = $_REQUEST['user'];
 $password = $_REQUEST['pass'];
 $wsdl = "http://a19c32c9f6734e2c910e05c5d64ebed6.cloudapp.net/services/CloudTikiWikiService.svc?wsdl";
