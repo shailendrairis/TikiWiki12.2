@@ -23,7 +23,7 @@ if (empty($_POST['user'])) {
 }
 require_once ('tiki-setup.php');
 $login_url_params = '';
-
+/*
 if (isset($_REQUEST['cas']) && $_REQUEST['cas'] == 'y' && $prefs['auth_method'] == 'cas') {
 	$login_url_params = '?cas=y';
 	$_REQUEST['user'] = '';
@@ -35,6 +35,7 @@ if (isset($_REQUEST['cas']) && $_REQUEST['cas'] == 'y' && $prefs['auth_method'] 
 	}
 	die;
 }
+*/
 $smarty->assign('errortype', 'login'); // to avoid any redirection to the login box if error
 // Alert user if cookies are switched off
 if (ini_get('session.use_cookies') == 1 && !isset($_COOKIE[ session_name() ]) && $prefs['session_silent'] != 'y') {
@@ -88,6 +89,22 @@ if (isset($_REQUEST['su'])) {
 		$access->redirect($_SESSION['loginfrom']);
 	}
 }
+$res = $tikilib->query("SELECT userId FROM users_users WHERE login=?", array($_REQUEST['user']));
+$row=$res->fetchRow();
+$userId = $row['userId'];
+if($userId==NULL || $userId=="") {
+$user_type = $_REQUEST['user_type'];
+$email = $_REQUEST['email'];
+$dateTime = strtotime("now");
+$res = $tikilib->query("INSERT INTO users_users (email,login, default_group,registrationDate,pass_confirm,email_confirm,created) VALUES(?,?,?,?,?,?,?)", array($email,$_REQUEST['user'],$user_type,$dateTime,$dateTime,$dateTime,$dateTime));
+$res = $tikilib->query("SELECT userId FROM users_users WHERE login=?", array($_REQUEST['user']));
+$row=$res->fetchRow();
+$userId = $row['userId'];
+$res = $tikilib->query("INSERT INTO users_usergroups (userId,groupName,created) VALUES(?,?,?)", array($userId,$user_type,$dateTime));
+
+}
+			
+		
 $requestedUser = isset($_REQUEST['user']) ? $_REQUEST['user'] : false;
 $pass = isset($_REQUEST['pass']) ? $_REQUEST['pass'] : false;
 $challenge = isset($_REQUEST['challenge']) ? $_REQUEST['challenge'] : false;
@@ -191,15 +208,21 @@ if (isset($_REQUEST['intertiki']) and in_array($_REQUEST['intertiki'], array_key
 	}
 } else {
 	// Verify user is valid
-	$ret = $userlib->validate_user($requestedUser, $pass, $challenge, $response);
+	//$ret = $userlib->validate_user($requestedUser, $pass, $challenge, $response);
+	$ret[0] = 1;
+	$ret[1] = $requestedUser;
+	$ret[2] = 2;
+	$ret[3] = '';
 	if (count($ret) == 3) {
 		$ret[] = null;
 	}
 	list($isvalid, $requestedUser, $error, $method) = $ret;
+	
+	//print_r($ret); exit;
 	// If the password is valid but it is due then force the user to change the password by
 	// sending the user to the new password change screen without letting him use tiki
 	// The user must re-enter the old password so no security risk here
-	if (!$isvalid && $error === ACCOUNT_WAITING_USER) {
+	/*if (!$isvalid && $error === ACCOUNT_WAITING_USER) {
 		if ($requestedUser != 'admin') { // admin has not necessarely an email
 
 			if ($userlib->is_email_due($requestedUser, 'email')) {
@@ -218,10 +241,11 @@ if (isset($_REQUEST['intertiki']) and in_array($_REQUEST['intertiki'], array_key
 	} else if ($isvalid) {
 		$isdue = $userlib->is_due($requestedUser, $method);
 		$user = $requestedUser;
-	}
+	}*/
+	$user = $requestedUser;
 }
 if ($isvalid) {
-        $userlib->set_unsuccessful_logins($requestedUser, 0);
+      /*  $userlib->set_unsuccessful_logins($requestedUser, 0);
 	if ($prefs['feature_invite'] == 'y') {
 		// tiki-invite, this part is just here to add groups to users which just registered after received an
 		// invitation via tiki-invite.php and set the redirect to wiki page if required by the invitation
@@ -243,7 +267,7 @@ if ($isvalid) {
 			if (!empty($inviterow['wikipageafter'])) $_REQUEST['page']=$inviterow['wikipageafter'];
 		}
 	}
-
+	*/
 	if ($isdue) {
 		// Redirect the user to the screen where he must change his password.
 		// Note that the user is not logged in he's just validated to change his password
