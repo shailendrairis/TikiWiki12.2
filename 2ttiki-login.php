@@ -1,14 +1,10 @@
 <?php
-
-//$req_uri = explode("/",$_SERVER['REQUEST_URI']); 
-//$client_code = $req_uri[1];
-$client_code = $_REQUEST['client'];
-$user = $_REQUEST['user'];
-$password = $_REQUEST['pass'];
+$client_ID = $_REQUEST['clientid'];
+$user_ID = $_REQUEST['userid'];
 $wsdl = "http://a19c32c9f6734e2c910e05c5d64ebed6.cloudapp.net/services/CloudTikiWikiService.svc?wsdl";
-$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>"0");
+$params = array('userID'=>$user_ID,'ClientID'=>$client_ID);
 $client = new SoapClient($wsdl);
-$json_result = $client->LogOn($params);
+$json_result = $client->GetLoggedInUserDetails($params);
 $json_obj = json_decode($json_result->LogOnResult);
 $is_valid_login = $json_obj->{'IsValidLoggin'}; 
 if($is_valid_login) {
