@@ -9,8 +9,9 @@ $json_obj = json_decode($json_result->LogOnResult);
 $is_valid_login = $json_obj->{'IsValidLoggin'}; 
 if($is_valid_login) {
 	$email = $json_obj->{'EmailID'}; 
+     $user = $json_obj->{'UserName'}; 
 	$is_admin = $json_obj->{'IsSuperAdmin'}; 
-	if(isset($_REQUEST['user']) && $_REQUEST['user']!="") {
+	if(isset($_REQUEST['userid']) && $_REQUEST['userid']!="") {
 		$_POST['user'] = $user ;
 		$_POST['pass'] = 'dummy';
 		$_POST['email'] = $email;
