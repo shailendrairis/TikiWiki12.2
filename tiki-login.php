@@ -209,10 +209,19 @@ if (isset($_REQUEST['intertiki']) and in_array($_REQUEST['intertiki'], array_key
 } else {
 	// Verify user is valid
 	//$ret = $userlib->validate_user($requestedUser, $pass, $challenge, $response);
-	$ret[0] = 1;
-	$ret[1] = $requestedUser;
-	$ret[2] = 2;
-	$ret[3] = '';
+	if(isset($_REQUEST['error']) && $_REQUEST['error']!="") {
+		$ret[0] = 0;
+		$ret[1] = $requestedUser;
+		$ret[2] = -3;
+		$ret[3] = '';
+	}
+	else {
+		$ret[0] = 1;
+		$ret[1] = $requestedUser;
+		$ret[2] = 2;
+		$ret[3] = '';
+		$user = $requestedUser;
+	}
 	if (count($ret) == 3) {
 		$ret[] = null;
 	}
@@ -242,7 +251,7 @@ if (isset($_REQUEST['intertiki']) and in_array($_REQUEST['intertiki'], array_key
 		$isdue = $userlib->is_due($requestedUser, $method);
 		$user = $requestedUser;
 	}*/
-	$user = $requestedUser;
+	
 }
 if ($isvalid) {
       /*  $userlib->set_unsuccessful_logins($requestedUser, 0);
@@ -369,7 +378,8 @@ if ($isvalid) {
 	}
 } else {	// if ($isvalid) - invalid
 	// check if site is closed
-	if ($prefs['site_closed'] === 'y') {
+	//echo "falsed"; exit;
+	/*if ($prefs['site_closed'] === 'y') {
 		unset($bypass_siteclose_check);
 		include 'lib/setup/site_closed.php';
 	}
@@ -426,10 +436,16 @@ if ($isvalid) {
 			die;
 		}
 	}
+	*/
+	//echo $error; exit;
 	switch ($error) {
 		case PASSWORD_INCORRECT:
-			$error = tra('Invalid username or password');
-        		break;
+			$error = 'Invalid username or password';
+        	$smarty->assign('msg', $error);
+			$smarty->assign('mid', 'tiki-login.tpl');
+			$smarty->display('error.tpl');
+			exit;
+			
 
 		case USER_NOT_FOUND:
 			$smarty->assign('error_login', $error);
@@ -462,8 +478,8 @@ if ($isvalid) {
 		default:
 			$error = tra('Invalid username or password');
 	}
-	if (isset($extraButton)) $smarty->assign_by_ref('extraButton', $extraButton);
-
+	//if (isset($extraButton)) $smarty->assign_by_ref('extraButton', $extraButton);
+	//echo $error; exit;
 	//	Report error "inline" with the login module
 	$smarty->assign('error_login', $error);
 	$smarty->assign('mid', 'tiki-login.tpl');
