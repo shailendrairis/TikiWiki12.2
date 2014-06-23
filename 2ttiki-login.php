@@ -3,7 +3,7 @@ require_once("EncryptService.php");
 $eyptService = new EncryptService();
 $web_config_xml = simplexml_load_file('web.config');
 $wsdl = (String)$web_config_xml->children()->url;
-$encUser = $eyptService->decrypt($_REQUEST['user']);
+$encUser = $_REQUEST['user'];//$eyptService->decrypt($_REQUEST['user']);
 $userArray = explode(",",$encUser);
 if(count($userArray)==2) {
 	$user = $userArray[0];
