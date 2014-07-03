@@ -1,15 +1,17 @@
 <?php
+session_start();
 require_once("EncryptService.php");
 $eyptService = new EncryptService();
 $web_config_xml = simplexml_load_file('web.config');
 $wsdl = (String)$web_config_xml->children()->url;
-$encUser = $_REQUEST['user'];//$eyptService->decrypt($_REQUEST['user']);
+$encUser = $eyptService->decrypt($_REQUEST['user']);
 $userArray = explode(",",$encUser);
-if(count($userArray)==2) {
+if(count($userArray)==3) {
 	$user = $userArray[0];
 	$client_code = $userArray[1];
+	$last_login = $userArray[2];
 	if(isset($wsdl) && $wsdl!="") {
-		$params = array('UserID'=>$user,'ClientID'=>$client_code);
+		$params = array('UserID'=>$user,'ClientID'=>$client_code,'LastLoggedOn'=>$last_login);
 		$client = new SoapClient($wsdl);
 		$json_result = $client->GetLoggedInUserDetails($params);
 		$json_obj = json_decode($json_result->GetLoggedInUserDetailsResult);
@@ -18,7 +20,7 @@ if(count($userArray)==2) {
 			$email = $json_obj->{'EmailID'}; 
 			$is_admin = $json_obj->{'IsSuperAdmin'}; 
 			if(isset($_REQUEST['user']) && $_REQUEST['user']!="") {
-				$_POST['user'] = $user ;
+				$_POST['user'] = $json_obj->{'UserName'};
 				$_POST['pass'] = $password;
 				$_POST['email'] = $email;
 				if($is_admin) {
@@ -34,9 +36,9 @@ if(count($userArray)==2) {
 		}
 		else {
 			//header('Location: index.php');
-			$_POST['user'] = $user ;
+			$_POST['user'] = $json_obj->{'UserName'};
 			$_POST['pass'] = $password;
-			$_POST['error'] = "Invalid Login";
+			$_POST['error'] = $json_obj->{'ErrorMsg'};
 			require_once('tiki-login.php');
 		}
 	}
@@ -44,7 +46,15 @@ if(count($userArray)==2) {
 else {
 	$user = $_REQUEST['user'];
 	$password = $_REQUEST['pass'];
-	$client_code = "abcd";
+	if(isset($_SESSION['client_code']) && $_SESSION['client_code']!="") {
+		$clientcode = $_SESSION['client_code'];
+	}
+	else {
+		$_POST['user'] = $user ;
+		$_POST['pass'] = $password;
+		$_POST['error'] = "Invalid Login";
+		require_once('tiki-login.php');
+	}
 	if(isset($wsdl) && $wsdl!="") {
 		$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>"0");
 		$client = new SoapClient($wsdl);
@@ -55,7 +65,7 @@ else {
 			$email = $json_obj->{'EmailID'}; 
 			$is_admin = $json_obj->{'IsSuperAdmin'}; 
 			if(isset($_REQUEST['user']) && $_REQUEST['user']!="") {
-				$_POST['user'] = $user ;
+				$_POST['user'] = $json_obj->{'UserName'}; 
 				$_POST['pass'] = $password;
 				$_POST['email'] = $email;
 				if($is_admin) {
@@ -71,9 +81,9 @@ else {
 		}
 		else {
 			//header('Location: index.php');
-			$_POST['user'] = $user ;
+			$_POST['user'] = $json_obj->{'UserName'}; 
 			$_POST['pass'] = $password;
-			$_POST['error'] = "Invalid Login";
+			$_POST['error'] = $json_obj->{'ErrorMsg'};
 			require_once('tiki-login.php');
 		}
 	}

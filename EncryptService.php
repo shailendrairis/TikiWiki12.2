@@ -8,8 +8,10 @@ class EncryptService{
 	
 	function encrypt($string) {
         //Key
-        $key = "lowrycom";
+        //$key = "lowrycom";
         //Encryption
+		$web_config_xml = simplexml_load_file('web.config');
+		$key = (String)$web_config_xml->children()->key;
         $cipher_alg = MCRYPT_TRIPLEDES;
         $iv = mcrypt_create_iv(mcrypt_get_iv_size($cipher_alg,MCRYPT_MODE_ECB), MCRYPT_RAND); 
         $encrypted_string = mcrypt_encrypt($cipher_alg, $key, $string, MCRYPT_MODE_ECB, $iv);
@@ -18,9 +20,13 @@ class EncryptService{
     }
 
     function decrypt($string) {
-        $string = base64_decode($string);
+        $string = str_replace("~cloud~","/",str_replace("~Upsafety~","+",str_replace("~2Tech~","=",$string)));
+		$string = str_replace("--cloud--","/",str_replace("--Upsafety--","+",str_replace("--2Tech--","=",$string)));
+		$string = base64_decode($string);
         //key
-        $key = "lowrycom";
+        //key = "lowrycom";
+		$web_config_xml = simplexml_load_file('web.config');
+		$key = (String)$web_config_xml->children()->key;
         $cipher_alg = MCRYPT_TRIPLEDES;
         $iv = mcrypt_create_iv(mcrypt_get_iv_size($cipher_alg,MCRYPT_MODE_ECB), MCRYPT_RAND); 
         $decrypted_string = mcrypt_decrypt($cipher_alg, $key, $string, MCRYPT_MODE_ECB, $iv);

@@ -7,7 +7,6 @@
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
 // $Id: tiki-index.php 49803 2014-02-10 17:27:45Z jyhem $
-
 require_once ('check_composer_exists.php');
 
 $inputConfiguration = array(
