@@ -10,7 +10,7 @@ class EncryptService{
         //Key
         //$key = "lowrycom";
         //Encryption
-		$web_config_xml = simplexml_load_file('web.config');
+		$web_config_xml = simplexml_load_file('tikiweb.config');
 		$key = (String)$web_config_xml->children()->key;
         $cipher_alg = MCRYPT_TRIPLEDES;
         $iv = mcrypt_create_iv(mcrypt_get_iv_size($cipher_alg,MCRYPT_MODE_ECB), MCRYPT_RAND); 
@@ -25,7 +25,7 @@ class EncryptService{
 		$string = base64_decode($string);
         //key
         //key = "lowrycom";
-		$web_config_xml = simplexml_load_file('web.config');
+		$web_config_xml = simplexml_load_file('tikiweb.config');
 		$key = (String)$web_config_xml->children()->key;
         $cipher_alg = MCRYPT_TRIPLEDES;
         $iv = mcrypt_create_iv(mcrypt_get_iv_size($cipher_alg,MCRYPT_MODE_ECB), MCRYPT_RAND); 

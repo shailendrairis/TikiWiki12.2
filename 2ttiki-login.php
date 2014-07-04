@@ -2,18 +2,22 @@
 session_start();
 require_once("EncryptService.php");
 $eyptService = new EncryptService();
-$web_config_xml = simplexml_load_file('web.config');
+$web_config_xml = simplexml_load_file('tikiweb.config');
 $wsdl = (String)$web_config_xml->children()->url;
 $encUser = $eyptService->decrypt($_REQUEST['user']);
+$encUser = str_replace("\0","",$encUser);
 $userArray = explode(",",$encUser);
 if(count($userArray)==3) {
-	$user = $userArray[0];
-	$client_code = $userArray[1];
-	$last_login = $userArray[2];
+	$user = trim($userArray[0]); 
+	$client_code = trim($userArray[1]); 
+	$last_login = trim($userArray[2]); 
+	//mail('shishir.kumar@irissoftware.com','',
 	if(isset($wsdl) && $wsdl!="") {
 		$params = array('UserID'=>$user,'ClientID'=>$client_code,'LastLoggedOn'=>$last_login);
-		$client = new SoapClient($wsdl);
+		$my_cert_file = (String)$web_config_xml->children()->cert_file;
+		$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
 		$json_result = $client->GetLoggedInUserDetails($params);
+		
 		$json_obj = json_decode($json_result->GetLoggedInUserDetailsResult);
 		$is_valid_login = $json_obj->{'IsValidLoggin'}; 
 		if($is_valid_login) {
@@ -47,7 +51,7 @@ else {
 	$user = $_REQUEST['user'];
 	$password = $_REQUEST['pass'];
 	if(isset($_SESSION['client_code']) && $_SESSION['client_code']!="") {
-		$clientcode = $_SESSION['client_code'];
+		$client_code = $_SESSION['client_code'];
 	}
 	else {
 		$_POST['user'] = $user ;
@@ -57,8 +61,10 @@ else {
 	}
 	if(isset($wsdl) && $wsdl!="") {
 		$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>"0");
-		$client = new SoapClient($wsdl);
+		$my_cert_file = (String)$web_config_xml->children()->cert_file;
+		$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
 		$json_result = $client->LogOn($params);
+		
 		$json_obj = json_decode($json_result->LogOnResult);
 		$is_valid_login = $json_obj->{'IsValidLoggin'}; 
 		if($is_valid_login) {
