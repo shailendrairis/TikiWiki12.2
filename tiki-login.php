@@ -38,12 +38,12 @@ if (isset($_REQUEST['cas']) && $_REQUEST['cas'] == 'y' && $prefs['auth_method'] 
 */
 $smarty->assign('errortype', 'login'); // to avoid any redirection to the login box if error
 // Alert user if cookies are switched off
-if (ini_get('session.use_cookies') == 1 && !isset($_COOKIE[ session_name() ]) && $prefs['session_silent'] != 'y') {
+/*if (ini_get('session.use_cookies') == 1 && !isset($_COOKIE[ session_name() ]) && $prefs['session_silent'] != 'y') {
 	$smarty->assign('msg', tra('You have to enable cookies to be able to login to this site'));
 	$smarty->display('error.tpl');
 	exit;
 }
-
+*/
 // Redirect to HTTPS if we are not in HTTPS but we require HTTPS login
 if (!$https_mode && $prefs['https_login'] == 'required') {
 	header('Location: ' . $base_url_https . $prefs['login_url'] . $login_url_params);
