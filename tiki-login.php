@@ -7,7 +7,7 @@
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 // $Id: tiki-login.php 51166 2014-05-07 16:00:38Z arildb $
-
+session_start();
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
 		'user' => 'text',
@@ -89,21 +89,22 @@ if (isset($_REQUEST['su'])) {
 		$access->redirect($_SESSION['loginfrom']);
 	}
 }
-$res = $tikilib->query("SELECT userId FROM users_users WHERE login=?", array($_REQUEST['user']));
-$row=$res->fetchRow();
-$userId = $row['userId'];
-if($userId==NULL || $userId=="") {
-$user_type = $_REQUEST['user_type'];
-$email = $_REQUEST['email'];
-$dateTime = strtotime("now");
-$res = $tikilib->query("INSERT INTO users_users (email,login, default_group,registrationDate,pass_confirm,email_confirm,created) VALUES(?,?,?,?,?,?,?)", array($email,$_REQUEST['user'],$user_type,$dateTime,$dateTime,$dateTime,$dateTime));
-$res = $tikilib->query("SELECT userId FROM users_users WHERE login=?", array($_REQUEST['user']));
-$row=$res->fetchRow();
-$userId = $row['userId'];
-$res = $tikilib->query("INSERT INTO users_usergroups (userId,groupName,created) VALUES(?,?,?)", array($userId,$user_type,$dateTime));
-
-}
-			
+if(!isset($_REQUEST['error'])) {
+	$res = $tikilib->query("SELECT userId FROM users_users WHERE login=?", array($_REQUEST['user']));
+	$row=$res->fetchRow();
+	$userId = $row['userId'];
+	if($userId==NULL || $userId=="") {
+		$user_type = $_REQUEST['user_type'];
+		$email = $_REQUEST['email'];
+		$dateTime = strtotime("now");
+		$res = $tikilib->query("INSERT INTO users_users (email,login, default_group,registrationDate,pass_confirm,email_confirm,created) VALUES(?,?,?,?,?,?,?)", array($email,$_REQUEST['user'],$user_type,$dateTime,$dateTime,$dateTime,$dateTime));
+		$res = $tikilib->query("SELECT userId FROM users_users WHERE login=?", array($_REQUEST['user']));
+		$row=$res->fetchRow();
+		$userId = $row['userId'];
+		$res = $tikilib->query("INSERT INTO users_usergroups (userId,groupName,created) VALUES(?,?,?)", array($userId,$user_type,$dateTime));
+	}
+	$res = $tikilib->query("UPDATE users_users SET fname=?, lname=?, appUserId=?, clientId=?, clientCode=? WHERE userId=?", array($_REQUEST['fname'],$_REQUEST['lname'],$_REQUEST['appuserid'],$_REQUEST['clientid'],$_REQUEST['clientcode'],$userId));
+}			
 		
 $requestedUser = isset($_REQUEST['user']) ? $_REQUEST['user'] : false;
 $pass = isset($_REQUEST['pass']) ? $_REQUEST['pass'] : false;
@@ -221,6 +222,11 @@ if (isset($_REQUEST['intertiki']) and in_array($_REQUEST['intertiki'], array_key
 		$ret[2] = 2;
 		$ret[3] = '';
 		$user = $requestedUser;
+		$res1 = $tikilib->query("SELECT fname,lname FROM users_users WHERE login=?", array($user));
+		$row1=$res1->fetchRow();
+		$fname = $row1['fname'];
+		$lname = $row1['lname']; 
+		$smarty->assign('fname',$fname);
 	}
 	if (count($ret) == 3) {
 		$ret[] = null;
@@ -481,6 +487,7 @@ if ($isvalid) {
 	//if (isset($extraButton)) $smarty->assign_by_ref('extraButton', $extraButton);
 	//echo $error; exit;
 	//	Report error "inline" with the login module
+	$error = $_REQUEST['error'];
 	$smarty->assign('error_login', $error);
 	$smarty->assign('mid', 'tiki-login.tpl');
 	$smarty->display('tiki.tpl');

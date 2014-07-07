@@ -4400,8 +4400,28 @@ class TikiLib extends TikiDb_Bridge
 				$hash2[] = $hash3;
 			}
 		}
+		
+		
+		
 		$pages = $this->table('tiki_pages');
 		$page_id = $pages->insert($insertData);
+		if($page_id!="") {
+			$web_config_xml = simplexml_load_file('./tikiweb.config');
+			$wsdl = (String)$web_config_xml->children()->url;
+			$query1 = "SELECT clientId FROM users_users WHERE login=?";
+			$result1 = $this->fetchAll($query1, array($user));
+			foreach ( $result1 as $res1 ) {
+				 $clientId = $res1['clientId'];
+			}
+			if(isset($wsdl) && $wsdl!="") {
+				$params = array('TikiWikiPageID'=>$page_id,'PageName'=>$name,'PageTitle'=>$name,'UserName'=>$user,'ClientID'=>$clientId,'Operation'=>'Insert');
+				//print_r($params); exit;
+				$my_cert_file = (String)$web_config_xml->children()->cert_file;
+				$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
+				$json_result = $client->SaveTikiWikiPage($params);
+				//print_r($json_result); exit;
+			}
+		}
 
 		//update status, page storage was updated in tiki 9 to be non html encoded
 		require_once('lib/wiki/wikilib.php');
@@ -4821,6 +4841,29 @@ class TikiLib extends TikiDb_Bridge
 			'lang' => $lang,
 		);
 
+		$query = "SELECT page_id FROM tiki_pages WHERE pageName=?";
+		$result = $this->fetchAll($query, array($pageName));
+		foreach ( $result as $res ) {
+			$page_id = $res['page_id']; 
+		}
+		//echo $edit_user; exit;	
+		if($page_id!="") {
+			$web_config_xml = simplexml_load_file('./tikiweb.config'); 
+			$wsdl = (String)$web_config_xml->children()->url;
+			$query1 = "SELECT clientId FROM users_users WHERE login=?";
+			$result1 = $this->fetchAll($query1, array($edit_user));
+			foreach ( $result1 as $res1 ) {
+				 $clientId = $res1['clientId'];
+			}
+			if(isset($wsdl) && $wsdl!="") {
+				$params = array('TikiWikiPageID'=>$page_id,'PageName'=>$pageName,'PageTitle'=>$pageName,'UserName'=>$edit_user,'ClientID'=>$clientId,'Operation'=>'Update');
+				$my_cert_file = (String)$web_config_xml->children()->cert_file;
+				$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
+				$json_result = $client->SaveTikiWikiPage($params);
+				//print_r($json_result); exit;
+			}
+		}
+		
 		if ($hash !== null) {
 			if (!empty($hash['lock_it']) && ($hash['lock_it'] == 'y' || $hash['lock_it'] == 'on')) {
 				$queryData['flag'] = 'L';
