@@ -7,11 +7,8 @@
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 // $Id: tiki-login.php 51166 2014-05-07 16:00:38Z arildb $
-//session_start();
+session_start();
 
-if ( $prefs['session_silent'] == 'y' ) {
-	session_start();
-}
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
 		'user' => 'text',
