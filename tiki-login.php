@@ -374,7 +374,7 @@ if ($isvalid) {
 			if ($url == '' || preg_match('/(tiki-register|tiki-login_validate|tiki-login_scr)\.php/', $url)) $url = $prefs['tikiIndex'];
 			// Now if the remember me feature is on and the user checked the rememberme checkbox then ...
 			if(isset($_REQUEST['page']) && $_REQUEST['page']!='') {
-				$url = 'tiki-index.php?page='.$_REQUEST['page']
+				$url = 'tiki-index.php?page='.$_REQUEST['page'];
 			}
 			if ($prefs['rememberme'] != 'disabled' && isset($_REQUEST['rme']) && $_REQUEST['rme'] == 'on') {
 				$userInfo = $userlib->get_user_info($user);

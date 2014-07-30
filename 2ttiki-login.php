@@ -1,5 +1,5 @@
 <?php
-//session_start();
+session_start();
 require_once("EncryptService.php");
 $eyptService = new EncryptService();
 $web_config_xml = simplexml_load_file('tikiweb.config');
