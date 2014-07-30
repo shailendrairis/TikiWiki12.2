@@ -1,5 +1,5 @@
 <?php
-session_start();
+//session_start();
 require_once("EncryptService.php");
 $eyptService = new EncryptService();
 $web_config_xml = simplexml_load_file('tikiweb.config');
@@ -11,6 +11,9 @@ if(count($userArray)==3) {
 	$user = trim($userArray[0]); 
 	$client_code = trim($userArray[1]); 
 	$last_login = trim($userArray[2]); 
+	if(isset($_REQUEST['page']) && $_REQUEST['page']!='') {
+		$page = $_REQUEST['page'];
+	}
 	if(isset($wsdl) && $wsdl!="") {
 		$params = array('UserID'=>$user,'ClientID'=>$client_code,'LastLoggedOn'=>$last_login);
 		$my_cert_file = (String)$web_config_xml->children()->cert_file;
@@ -39,10 +42,17 @@ if(count($userArray)==3) {
 				}
 				$_POST['challenge'] = "dummy";
 				$_POST['response'] = "dummy";
+				if(isset($page) && $page='') {
+					$_POST['page'] = $page;
+				}
 				require_once('tiki-login.php');
 			}
 		}
 		else {
+			//if(isset($page) && $page!='') {
+				$redirect = (String)$web_config_xml->children()->tocotiteurl;
+				header('Location: '.$redirect);
+			//}
 			//header('Location: index.php');
 			$_POST['user'] = $json_obj->{'UserName'};
 			$_POST['pass'] = 'dummy';

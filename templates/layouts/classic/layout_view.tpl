@@ -147,7 +147,9 @@
 							<footer class="footer" id="footer">
 								<div class="footer_liner">
 									<div class="fixedwidth footerbgtrap">
-										{modulelist zone=bottom class="content modules" bidi=y}
+										<!--{modulelist zone=bottom class="content modules" bidi=y}-->
+										United Public Safety / Ph. 215-394-1906 / Fax. 215-394-1908 /<a href='mailto:support@upsafety.net'>
+            support@upsafety.net</a> / <a target="_blank" href="http://www.upsafety.net">www.upsafety.net</a>
 									</div>
 								</div>
 							</footer>{* -- END of footer -- *}

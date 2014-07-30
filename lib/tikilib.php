@@ -3073,57 +3073,82 @@ class TikiLib extends TikiDb_Bridge
 		} else {
 			$params = '';
 		}
+		
+		
 		//  Deal with mail notifications.
 		include_once('lib/notifications/notificationemaillib.php');
 		$foo = parse_url($_SERVER["REQUEST_URI"]);
 		$machine = self::httpPrefix(true). dirname($foo["path"]);
 		$page_info = $this->get_page_info($page);
 		sendWikiEmailNotification('wiki_page_deleted', $page, $user, $comment, 1, $page_info['data'], $machine);
-
+		
 		//Remove the bibliography references for this page
-		$this->removePageReference($page);
-
-		$wikilib = TikiLib::lib('wiki');
-		$multilinguallib = TikiLib::lib('multilingual');
-		$multilinguallib->detachTranslation('wiki page', $multilinguallib->get_page_id_from_name($page));
-		$this->invalidate_cache($page);
-		//Delete structure references before we delete the page
-		$query  = "select `page_ref_id` ";
-		$query .= "from `tiki_structures` ts, `tiki_pages` tp ";
-		$query .= "where ts.`page_id`=tp.`page_id` and `pageName`=?";
-		$result = $this->fetchAll($query, array($page));
-		foreach ( $result as $res ) {
-			$this->remove_from_structure($res["page_ref_id"]);
+		$page_id = $page_info['page_id'];
+		if($page_id!="") {
+			$web_config_xml = simplexml_load_file('./tikiweb.config'); 
+			$wsdl = (String)$web_config_xml->children()->url;
+			$query1 = "SELECT clientId FROM users_users WHERE login=?";
+			$result1 = $this->fetchAll($query1, array($user));
+			foreach ( $result1 as $res1 ) {
+				 $clientId = $res1['clientId'];
+			}
+			if(isset($wsdl) && $wsdl!="") {
+				$params = array('TikiWikiPageID'=>$page_id,'PageName'=>$page,'PageTitle'=>$page,'UserName'=>$user,'ClientID'=>$clientId,'Operation'=>'Delete');
+				$my_cert_file = (String)$web_config_xml->children()->cert_file;
+				$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
+				$json_result = $client->SaveTikiWikiPage($params);
+			}
 		}
+		if($page_id!="" && $json_result->SaveTikiWikiPageResult=="Success") {
+			$this->removePageReference($page);
 
-		$this->table('tiki_pages')->delete(array('pageName' => $page));
-		if ($prefs['feature_contribution'] == 'y') {
-			$contributionlib = TikiLib::lib('contribution');
-			$contributionlib->remove_page($page);
+			$wikilib = TikiLib::lib('wiki');
+			$multilinguallib = TikiLib::lib('multilingual');
+			$multilinguallib->detachTranslation('wiki page', $multilinguallib->get_page_id_from_name($page));
+			$this->invalidate_cache($page);
+			//Delete structure references before we delete the page
+			$query  = "select `page_ref_id` ";
+			$query .= "from `tiki_structures` ts, `tiki_pages` tp ";
+			$query .= "where ts.`page_id`=tp.`page_id` and `pageName`=?";
+			$result = $this->fetchAll($query, array($page));
+			foreach ( $result as $res ) {
+				$this->remove_from_structure($res["page_ref_id"]);
+			}
+
+			$this->table('tiki_pages')->delete(array('pageName' => $page));
+			if ($prefs['feature_contribution'] == 'y') {
+				$contributionlib = TikiLib::lib('contribution');
+				$contributionlib->remove_page($page);
+			}
+			$this->table('tiki_history')->deleteMultiple(array('pageName' => $page));
+			$this->table('tiki_links')->deleteMultiple(array('fromPage' => $page));
+			$logslib = TikiLib::lib('logs');
+			$logslib->add_action('Removed', $page, 'wiki page', $params);
+			//get_strings tra("Removed");
+			$this->table('users_groups')->updateMultiple(array('groupHome' => null), array('groupHome' => $page));
+
+			$this->table('tiki_theme_control_objects')->deleteMultiple(array('name' => $page,'type' => 'wiki page'));
+			$this->table('tiki_copyrights')->deleteMultiple(array('page' => $page));
+
+			$this->remove_object('wiki page', $page);
+
+			$this->table('tiki_user_watches')->deleteMultiple(array('event' => 'wiki_page_changed', 'object' => $page));
+			$this->table('tiki_group_watches')->deleteMultiple(array('event' => 'wiki_page_changed', 'object' => $page));
+
+			$atts = $wikilib->list_wiki_attachments($page, 0, -1, 'created_desc', '');
+			foreach ($atts["data"] as $at) {
+				$wikilib->remove_wiki_attachment($at["attId"]);
+			}
+
+			$wikilib->remove_footnote('', $page);
+			$this->refresh_index('wiki page', $page);
 		}
-		$this->table('tiki_history')->deleteMultiple(array('pageName' => $page));
-		$this->table('tiki_links')->deleteMultiple(array('fromPage' => $page));
-		$logslib = TikiLib::lib('logs');
-		$logslib->add_action('Removed', $page, 'wiki page', $params);
-		//get_strings tra("Removed");
-		$this->table('users_groups')->updateMultiple(array('groupHome' => null), array('groupHome' => $page));
-
-		$this->table('tiki_theme_control_objects')->deleteMultiple(array('name' => $page,'type' => 'wiki page'));
-		$this->table('tiki_copyrights')->deleteMultiple(array('page' => $page));
-
-		$this->remove_object('wiki page', $page);
-
-		$this->table('tiki_user_watches')->deleteMultiple(array('event' => 'wiki_page_changed', 'object' => $page));
-		$this->table('tiki_group_watches')->deleteMultiple(array('event' => 'wiki_page_changed', 'object' => $page));
-
-		$atts = $wikilib->list_wiki_attachments($page, 0, -1, 'created_desc', '');
-		foreach ($atts["data"] as $at) {
-			$wikilib->remove_wiki_attachment($at["attId"]);
+		else {
+			return false;
 		}
-
-		$wikilib->remove_footnote('', $page);
-		$this->refresh_index('wiki page', $page);
-
+		
+		
+		
 		return true;
 	}
 
