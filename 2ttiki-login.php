@@ -79,7 +79,7 @@ else {
 	else {
 		$_POST['user'] = $user ;
 		$_POST['pass'] = $password;
-		$_POST['error'] = "Invalid Login";
+		$_POST['error'] = "The ClientCode provided is incorrect.";
 		require_once('tiki-login.php');
 	}
 	if(isset($wsdl) && $wsdl!="") {
