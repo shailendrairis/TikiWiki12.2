@@ -159,12 +159,12 @@ if (jqueryTiki.tooltips) {
 		{if $mode eq "popup"}
 			<div class="siteloginbar_popup">
 				<ul class="clearfix{if $prefs.feature_jquery_tooltips ne 'y'} cssmenu_horiz{/if}">
-					<li id="logout_link_{$module_logo_instance}"><div class="tabmark"><a href="tiki-login.php" class="login_link" onclick="return false;" rel=".siteloginbar_poppedup">{tr}Log in{/tr}</a></div>
+					<li id="logout_link_{$module_logo_instance}"><div class="tabmark"><a href="2ttiki-login.php" class="login_link" onclick="return false;" rel=".siteloginbar_poppedup">{tr}Log in{/tr}</a></div>
 						<ul class="siteloginbar_poppedup cbox">
 							<li class="tabcontent">
 								{capture assign="close_tags"}</li></ul></li></ul></div>{$close_tags}{/capture}
 		{/if}
-		<form name="loginbox" id="loginbox-{$module_logo_instance}" action="{$login_module.login_url|escape}"
+		<form name="loginbox" id="loginbox-{$module_logo_instance}" action="2ttiki-login.php"
 				method="post" {if $prefs.feature_challenge eq 'y'}onsubmit="doChallengeResponse()"{/if}
 				{if $prefs.desactive_login_autocomplete eq 'y'} autocomplete="off"{/if}> 
 		{if $prefs.feature_challenge eq 'y'}
