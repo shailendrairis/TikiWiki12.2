@@ -14,6 +14,10 @@ if(count($userArray)==3) {
 	if(isset($_REQUEST['page']) && $_REQUEST['page']!='') {
 		$page = $_REQUEST['page'];
 	}
+	else if(isset($_REQUEST['Page']) && $_REQUEST['Page']!='') {
+		$page = $_REQUEST['Page'];
+	}
+	
 	if(isset($wsdl) && $wsdl!="") {
 		$params = array('UserID'=>$user,'ClientID'=>$client_code,'LastLoggedOn'=>$last_login);
 		$my_cert_file = (String)$web_config_xml->children()->cert_file;
@@ -42,7 +46,7 @@ if(count($userArray)==3) {
 				}
 				$_POST['challenge'] = "dummy";
 				$_POST['response'] = "dummy";
-				if(isset($page) && $page='') {
+				if(isset($page) && $page!='') {
 					$_POST['page'] = $page;
 				}
 				require_once('tiki-login.php');

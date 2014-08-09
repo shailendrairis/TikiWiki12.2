@@ -2,7 +2,7 @@
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="quickadmin" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	{if $tiki_p_admin == "y"}
-		<div id="quickadmin" style="text-align: left; padding-left: 12px;">
+		<!--<div id="quickadmin" style="text-align: left; padding-left: 12px;">
 			<ul class="cssmenu_horiz clearfix" style="display: inline-block;line-height: 30px;">
 				<li>
 					{if $prefs.feature_jquery_superfish eq "y"}
@@ -53,6 +53,6 @@
 			{if $prefs.feature_jcapture eq "y"}
 				{icon _id=camera title="{tr}Screen capture{/tr}" href="#" onclick="openJCaptureDialog('none', '{$page}', event);return false;"}
 			{/if}
-		</div>
+		</div>-->
 	{/if}
 {/tikimodule}
