@@ -37,7 +37,8 @@ if(count($userArray)==3) {
 				$_POST['lname'] = $json_obj->{'LastName'};;
 				$_POST['appuserid'] = $json_obj->{'UserId'};;
 				$_POST['clientid'] = $json_obj->{'ClientId'};;
-				$_POST['clientcode'] = $json_obj->{'ClientCode'};;
+				$_POST['clientcode'] = $json_obj->{'ClientCode'};
+				setcookie("client_code", $client_code);
 				if($is_admin) {
 					$_POST['user_type'] = "Admins";
 				}
