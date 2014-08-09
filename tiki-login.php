@@ -7,7 +7,7 @@
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 // $Id: tiki-login.php 51166 2014-05-07 16:00:38Z arildb $
-session_start();
+//session_start();
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
 		'user' => 'text',
@@ -447,9 +447,9 @@ if ($isvalid) {
 		}
 	}
 	*/
-	//echo $error; exit;
+	//echo $error.$_REQUEST['error']; exit;
 	switch ($error) {
-		case PASSWORD_INCORRECT:
+		/*case PASSWORD_INCORRECT:
 			$error = 'Invalid username or password';
         	$smarty->assign('msg', $error);
 			$smarty->assign('mid', 'tiki-login.tpl');
@@ -484,14 +484,15 @@ if ($isvalid) {
 		case USER_ALREADY_LOGGED:
 			$error = tra('You are already logged in.');
         		break;
-
+		*/
 		default:
-			$error = tra('Invalid username or password');
+			$error = $_REQUEST['error'];//tra('Invalid username or password');
 	}
 	//if (isset($extraButton)) $smarty->assign_by_ref('extraButton', $extraButton);
 	//echo $error; exit;
 	//	Report error "inline" with the login module
 	$error = $_REQUEST['error'];
+	//echo $_REQUEST['error']; exit;
 	$smarty->assign('error_login', $error);
 	$smarty->assign('mid', 'tiki-login.tpl');
 	$smarty->display('tiki.tpl');

@@ -70,6 +70,10 @@ else {
 	$password = $_REQUEST['pass'];
 	if(isset($_SESSION['client_code']) && $_SESSION['client_code']!="") {
 		$client_code = $_SESSION['client_code'];
+		setcookie("client_code", $client_code);
+	}
+	else if(isset($_COOKIE['client_code']) && $_COOKIE['client_code']!="") {
+		$client_code = $_COOKIE['client_code'];
 	}
 	else {
 		$_POST['user'] = $user ;
@@ -78,7 +82,13 @@ else {
 		require_once('tiki-login.php');
 	}
 	if(isset($wsdl) && $wsdl!="") {
-		$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>"0");
+		if(isset($_SESSION['attempt']) && $_SESSION['attempt']!="") {
+			$_SESSION['attempt']=$_SESSION['attempt'];
+		}
+		else {
+			$_SESSION['attempt']=0;
+		}
+		$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>$_SESSION['attempt']);
 		$my_cert_file = (String)$web_config_xml->children()->cert_file;
 		$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
 		$json_result = $client->LogOn($params);
@@ -107,12 +117,14 @@ else {
 				$_POST['response'] = "dummy";
 				require_once('tiki-login.php');
 			}
+			$_SESSION['attempt']=0;
 		}
 		else {
 			//header('Location: index.php');
 			$_POST['user'] = $json_obj->{'UserName'}; 
 			$_POST['pass'] = $password;
 			$_POST['error'] = $json_obj->{'ErrorMsg'};
+			$_SESSION['attempt']=$_SESSION['attempt']+1;
 			require_once('tiki-login.php');
 		}
 	}
