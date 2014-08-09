@@ -106,7 +106,7 @@ if ( isset($domain_map[$host]) ) {
 }
 
 if (isset($_REQUEST['PHPSESSID'])) {
-	$tikilib->setSessionId($_REQUEST['PHPSESSID']);
+	//$tikilib->setSessionId($_REQUEST['PHPSESSID']);
 }
 elseif (function_exists('session_id')) $tikilib->setSessionId(session_id());
 

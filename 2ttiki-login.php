@@ -38,7 +38,7 @@ if(count($userArray)==3) {
 				$_POST['appuserid'] = $json_obj->{'UserId'};;
 				$_POST['clientid'] = $json_obj->{'ClientId'};;
 				$_POST['clientcode'] = $json_obj->{'ClientCode'};
-				setcookie("client_code", $client_code);
+				setcookie("client_code", $client_code,time()+1800);
 				if($is_admin) {
 					$_POST['user_type'] = "Admins";
 				}
@@ -71,7 +71,7 @@ else {
 	$password = $_REQUEST['pass'];
 	if(isset($_SESSION['client_code']) && $_SESSION['client_code']!="") {
 		$client_code = $_SESSION['client_code'];
-		setcookie("client_code", $client_code);
+		setcookie("client_code", $client_code,time()+1800);
 	}
 	else if(isset($_COOKIE['client_code']) && $_COOKIE['client_code']!="") {
 		$client_code = $_COOKIE['client_code'];
