@@ -23,7 +23,7 @@ if(count($userArray)==3) {
 		$my_cert_file = (String)$web_config_xml->children()->cert_file;
 		$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
 		$json_result = $client->GetLoggedInUserDetails($params);
-		//print_r($json_result); exit;
+		print_r($json_result); exit;
 		$json_obj = json_decode($json_result->GetLoggedInUserDetailsResult);
 		$is_valid_login = $json_obj->{'IsValidLoggin'}; 
 		if($is_valid_login) {
