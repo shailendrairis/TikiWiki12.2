@@ -8,9 +8,10 @@
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
 // $Id: index.php 49803 2014-02-10 17:27:45Z jyhem $
-session_start();
+//session_start();
 if(isset($_REQUEST['clientcode']) && $_REQUEST['clientcode']!="")  {
-	$_SESSION['client_code'] = $_REQUEST['clientcode'];
+	//$_SESSION['client_code'] = $_REQUEST['clientcode'];
+	setcookie("client_code", $_REQUEST['clientcode'],time()+1800);
 }
 require_once ('check_composer_exists.php');
 

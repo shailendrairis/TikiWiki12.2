@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once("EncryptService.php");
 $eyptService = new EncryptService();
 $web_config_xml = simplexml_load_file('tikiweb.config');
@@ -69,11 +68,12 @@ if(count($userArray)==3) {
 else {
 	$user = $_REQUEST['user'];
 	$password = $_REQUEST['pass'];
-	if(isset($_SESSION['client_code']) && $_SESSION['client_code']!="") {
-		$client_code = $_SESSION['client_code'];
-		setcookie("client_code", $client_code,time()+1800);
-	}
-	else if(isset($_COOKIE['client_code']) && $_COOKIE['client_code']!="") {
+	//if(isset($_SESSION['client_code']) && $_SESSION['client_code']!="") {
+		//$client_code = $_SESSION['client_code'];
+		//setcookie("client_code", $client_code,time()+1800);
+	//}
+	//else if(isset($_COOKIE['client_code']) && $_COOKIE['client_code']!="") {
+	if(isset($_COOKIE['client_code']) && $_COOKIE['client_code']!="") {	
 		$client_code = $_COOKIE['client_code'];
 	}
 	else {
@@ -83,13 +83,19 @@ else {
 		require_once('tiki-login.php');
 	}
 	if(isset($wsdl) && $wsdl!="") {
-		if(isset($_SESSION['attempt']) && $_SESSION['attempt']!="") {
-			$_SESSION['attempt']=$_SESSION['attempt'];
+		//if(isset($_SESSION['attempt']) && $_SESSION['attempt']!="") {
+			//$_SESSION['attempt']=$_SESSION['attempt'];
+		if(isset($_COOKIE['attempt']) && $_COOKIE['attempt']!="") {	
+			$attempt = $_COOKIE['attempt'];
+			setcookie("attempt", $attempt);
 		}
 		else {
-			$_SESSION['attempt']=0;
+			//$_SESSION['attempt']=0;
+			$attempt = 0;
+			setcookie("attempt", $attempt);
 		}
-		$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>$_SESSION['attempt']);
+		//echo $attempt; exit;
+		$params = array('UserName'=>$user,'Password'=>$password,'ClientCode'=>$client_code,'FailedLoginCount'=>$attempt);
 		$my_cert_file = (String)$web_config_xml->children()->cert_file;
 		$client = new SoapClient($wsdl,array('local_cert', $my_cert_file));
 		$json_result = $client->LogOn($params);
@@ -97,6 +103,7 @@ else {
 		$json_obj = json_decode($json_result->LogOnResult);
 		$is_valid_login = $json_obj->{'IsValidLoggin'}; 
 		if($is_valid_login) {
+			setcookie("attempt", '', time() - 3600);
 			$email = $json_obj->{'EmailID'}; 
 			$is_admin = $json_obj->{'IsSuperAdmin'}; 
 			if(isset($_REQUEST['user']) && $_REQUEST['user']!="") {
@@ -118,14 +125,22 @@ else {
 				$_POST['response'] = "dummy";
 				require_once('tiki-login.php');
 			}
-			$_SESSION['attempt']=0;
+			//$_SESSION['attempt']=0;
+			//$attempt = 0;
 		}
 		else {
 			//header('Location: index.php');
 			$_POST['user'] = $json_obj->{'UserName'}; 
 			$_POST['pass'] = $password;
 			$_POST['error'] = $json_obj->{'ErrorMsg'};
-			$_SESSION['attempt']=$_SESSION['attempt']+1;
+			//$_SESSION['attempt']=$_SESSION['attempt']+1;
+			if(isset($_COOKIE['attempt']) && $_COOKIE['attempt']!="") {	
+				$attempt = $_COOKIE['attempt']+1;
+			}
+			else {
+				$attempt = 0;
+			}
+			setcookie("attempt", $attempt);
 			require_once('tiki-login.php');
 		}
 	}
